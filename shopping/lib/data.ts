@@ -33,31 +33,7 @@ const data = {
             href:'/page/help',
         },
  ],
- carousels:[
-    {
-        title:'Most Popular Shoes For Sale',
-        buttonCaption:'Shop Now',
-        image:'/images/banner3.jpg',
-        url:'/search?category=Shoes',
-        isPublished:'true',
-    },
-    {
-        title:'Best Seller in T-Shirt',
-        buttonCaption:'Shop Now',
-        image:'/images/banner1.jpg',
-        url:'search?category=T-Shirts',
-        isPublished:'true',
-
-    },
-    {
-        title:'Best Deals on Wrist Wathhes',
-        buttonCaption:'See More',
-        image:'/images/banner2.jpg',
-        url:'/search?category Watches',
-        isPublished:'true',
-
-    }
- ]
+ 
 }
 
 export default data
