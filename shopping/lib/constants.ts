@@ -17,12 +17,12 @@ export const FREE_SHIPPING_MIN_PRICE = Number(
     {
       name: 'Stripe',
       commission: 0,
-      isDefault: true,
+      isDefault: false,
     },
     {
       name: 'Cash On Delivery',
       commission: 0,
-      isDefault: true,
+      isDefault: false,
     },
   ]
   export const DEFAULT_PAYMENT_METHOD =

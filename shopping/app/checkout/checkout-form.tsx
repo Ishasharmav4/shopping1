@@ -38,10 +38,14 @@ import useCartStore from '@/hooks/use-cart-store'
 import ProductPrice from '@/components/shared/product/product-price'
 import {
   APP_NAME,
+  
   AVAILABLE_DELIVERY_DATES,
+  
   AVAILABLE_PAYMENT_METHODS,
   DEFAULT_PAYMENT_METHOD,
 } from '@/lib/constants'
+import { createOrder } from '@/lib/actions/order.actions'
+import { toast } from 'sonner'
 
 const shippingAddressDefaultValues =
   process.env.NODE_ENV === 'development'
@@ -83,6 +87,7 @@ const CheckoutForm = () => {
     updateItem,
     removeItem,
     setDeliveryDateIndex,
+    clearCart,
   } = useCartStore()
   const isMounted = useIsMounted()
 
@@ -113,7 +118,28 @@ const CheckoutForm = () => {
     useState<boolean>(false)
 
   const handlePlaceOrder = async () => {
-    // TODO: place order
+  
+   // TODO: place order
+    const res = await createOrder({
+      items,
+      shippingAddress,
+      expectedDeliveryDate: calculateFutureDate(
+        AVAILABLE_DELIVERY_DATES[deliveryDateIndex!].daysToDeliver
+      ),
+      deliveryDateIndex,
+      paymentMethod,
+      itemsPrice,
+      shippingPrice,
+      taxPrice,
+      totalPrice,
+    })
+    if (!res.success) {
+      toast.error(res.message)
+    } else {
+      toast.success(res.message)
+      clearCart()
+      router.push(`/checkout/${res.data?.orderId}`)
+    }
   }
   const handleSelectPaymentMethod = () => {
     setIsAddressSelected(true)
@@ -395,6 +421,7 @@ const CheckoutForm = () => {
               </>
             )}
           </div>
+          
           {/* payment method */}
           <div className='border-y'>
             {isPaymentMethodSelected && paymentMethod ? (
@@ -431,21 +458,23 @@ const CheckoutForm = () => {
                       onValueChange={(value) => setPaymentMethod(value)}
                     >
                       {AVAILABLE_PAYMENT_METHODS.map((pm) => (
-                        <div key={pm.name} className='flex items-center py-1 '>
-                          <RadioGroupItem
-                            value={pm.name}
-                            id={`payment-${pm.name}`}
-                          />
-                          <Label
-                            className='font-bold pl-2 cursor-pointer'
-                            htmlFor={`payment-${pm.name}`}
-                          >
-                            {pm.name}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </CardContent>
+                <div key={pm.name} className="flex items-center py-1">
+                    <RadioGroupItem 
+                   value={pm.name} 
+                    id={`payment-${pm.name}`} 
+                    />
+                   <Label 
+                 className="font-bold pl-2 cursor-pointer" 
+                   htmlFor={`payment-${pm.name}`}
+                  >
+                   {pm.name}
+               </Label>
+                   </div>
+                   ))}
+                   </RadioGroup>
+                   </CardContent>
+                   
+
                   <CardFooter className='p-4'>
                     <Button
                       onClick={handleSelectPaymentMethod}
@@ -478,7 +507,7 @@ const CheckoutForm = () => {
                       formatDateTime(
                         calculateFutureDate(
                           AVAILABLE_DELIVERY_DATES[deliveryDateIndex]
-                            .daysToDeliver
+                            .daysToDeliver ?? 0
                         )
                       ).dateOnly
                     }
@@ -624,27 +653,29 @@ const CheckoutForm = () => {
                                         <ProductPrice
                                           price={dd.shippingPrice}
                                           plain
-                                        />
-                                      )}
-                                    </div>
-                                  </Label>
-                                </div>
-                              ))}
-                            </RadioGroup>
-                          </ul>
+                                          />
+                                        )}
+                                      </div>
+                                    </Label>
+                                  </div>
+                                ))}
+                              </RadioGroup>
+                            </ul>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <div className='flex text-muted-foreground text-lg font-bold my-4 py-3'>
-                <span className='w-8'>3 </span>
-                <span>Items and shipping</span>
-              </div>
-            )}
-          </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <div className='flex text-muted-foreground text-lg font-bold my-4 py-3'>
+                  <span className='w-8'>3 </span>
+                  <span>Items and shipping</span>
+                </div>
+              )}
+            </div>
+            
+
           {isPaymentMethodSelected && isAddressSelected && (
             <div className='mt-6'>
               <div className='block md:hidden'>
@@ -686,3 +717,4 @@ const CheckoutForm = () => {
   )
 }
 export default CheckoutForm
+
