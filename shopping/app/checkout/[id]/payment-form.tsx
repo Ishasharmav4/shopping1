@@ -46,9 +46,13 @@ clientSecret: string | null
 
   function PrintLoadingState() {
     const [{ isPending, isRejected }] = usePayPalScriptReducer()
-    if (isPending) return <p>Loading PayPal...</p>
-    if (isRejected) return <p className="text-red-500">Error loading PayPal.</p>
-    return null
+    let status = ''
+    if (isPending) {
+      status = 'Loading PayPal...'
+    } else if (isRejected) {
+      status = 'Error in loading PayPal.'
+    }
+    return status
   }
 
   const handleCreatePayPalOrder = async () => {
