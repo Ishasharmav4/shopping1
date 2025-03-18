@@ -2,8 +2,10 @@
 
 @plugin "tailwindcss-animate";
 
+/* Custom Variant for Dark Mode */
 @custom-variant dark (&:is(.dark *));
 
+/* Theme Inline with CSS Custom Properties */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -45,6 +47,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Root Variables for Light Mode */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -81,6 +84,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Dark Mode Variables */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -116,6 +120,7 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* Base Layer Styles */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -124,19 +129,20 @@
     @apply bg-background text-foreground;
   }
 }
-@layer utilities{
+
+/* Custom Utility Classes */
+@layer utilities {
   .highlight-link a,
   a.highlight-link {
-    @apply text-sky-700  hover:text-orange-700 hover:underline;
+    @apply text-sky-700 hover:text-orange-700 hover:underline;
   }
   .header-button {
-    @apply cursor-pointer p-1 border border-transparent hover:border-border rounded-[2px];;
-   }
-   .h1-bold {
+    @apply cursor-pointer p-1 border border-transparent hover:border-border rounded-[2px];
+  }
+  .h1-bold {
     @apply font-bold text-2xl lg:text-3xl;
-
-   }
-   .h2-bold {
+  }
+  .h2-bold {
     @apply font-bold text-lg lg:text-xl;
   }
 }
