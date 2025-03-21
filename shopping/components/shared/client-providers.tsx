@@ -1,9 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import CartSidebar from './cart-sidebar'
+import { ThemeProvider } from './theme-provider'
 
 
-// Mock implementation of `useCartSidebar` hook
+// Mock implementation of useCartSidebar hook
 const useCartSidebar = () => {
   // Simple state hook for managing cart sidebar visibility
   const [isOpen, setIsOpen] = useState(false)
@@ -24,7 +25,7 @@ const useCartSidebar = () => {
   return isOpen
 }
 
-// Mock implementation of `Sonner` component (for notifications)
+// Mock implementation of Sonner component (for notifications)
 const Sonner = () => {
   return <div className="notification">Cart Updated!</div>
 }
@@ -38,6 +39,7 @@ export default function ClientProviders({
 
   return (
     <>
+    <ThemeProvider attribute='class' defaultTheme='system'>
       {isCartSidebarOpen ? (
         <div className="flex min-h-screen">
           <div className="flex-1 overflow-hidden">{children}</div>
@@ -47,7 +49,7 @@ export default function ClientProviders({
         <div>{children}</div>
       )}
       <Sonner />
+      </ThemeProvider>
     </>
   )
 }
-

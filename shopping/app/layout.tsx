@@ -12,14 +12,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-import { APP_DESCRIPTION, APP_NAME, APP_SLOGAN } from '@/lib/constants'
-export const metadata:Metadata ={
-  title:{
-    template:`%s | $ {APP_NAME}`,
-    default:`${APP_NAME}. ${APP_SLOGAN}`,
+import { APP_DESCRIPTION, APP_NAME, APP_SLOGAN } from '@/lib/constants';
+
+
+import { ThemeProvider } from "@/components/shared/theme-provider";
+
+
+
+export const metadata: Metadata = {
+  title: {
+    template: `%s | ${APP_NAME}`, // Corrected template string
+    default: `${APP_NAME}. ${APP_SLOGAN}`,
   },
-  description:APP_DESCRIPTION,
-}  
+  description: APP_DESCRIPTION,
+};
 
 export default function RootLayout({
   children,
@@ -27,11 +33,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            
+          
         {children}
+        
+        </ThemeProvider>
+    
+
       </body>
     </html>
   );
