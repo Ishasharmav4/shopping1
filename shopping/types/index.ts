@@ -35,6 +35,15 @@ export type Data ={
     }[]
 }
 export type IOrderInput=z.infer<typeof OrderInputSchema>
+export type IOrderList = IOrderInput & {
+  _id: string
+  user: {
+    name: string
+    email: string
+  }
+  createdAt: Date
+}
+
 export type OrderItem = z.infer<typeof OrderItemSchema>
 export type Cart = z.infer<typeof CartSchema>
 export type IUserInput = z.infer<typeof UserInputSchema>

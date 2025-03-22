@@ -13,14 +13,16 @@ import ThemeSwitcher from './theme-switcher'
 
 
 
-  export default function Menu(){
+  const Menu=({ forAdmin = false }: { forAdmin?: boolean }) =>{
+
   return (
     <div className='flex justify-end'>
       <nav className='md:flex gap-3 hidden w-full'>
         
         <ThemeSwitcher />
         <UserButton/>
-        <CartButton />
+        {forAdmin ? null : <CartButton />}
+        
         
       </nav>
       <nav className='md:hidden'>
@@ -45,4 +47,5 @@ import ThemeSwitcher from './theme-switcher'
     </div>
   )
 }
+export default Menu
 
