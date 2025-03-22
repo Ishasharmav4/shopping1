@@ -2,6 +2,40 @@
 
 import { connectToDatabase } from '@/lib/db'
 
+
+
+
+// CREATE
+export async function createProduct(data: IProductInput) {
+  try {
+    const product = ProductInputSchema.parse(data)
+    await connectToDatabase()
+    await Product.create(product)
+    revalidatePath('/admin/products')
+    return {
+      success: true,
+      message: 'Product created successfully',
+    }
+  } catch (error) {
+    return { success: false, message: formatError(error) }
+  }
+}
+
+// UPDATE
+export async function updateProduct(data: z.infer<typeof ProductUpdateSchema>) {
+  try {
+    const product = ProductUpdateSchema.parse(data)
+    await connectToDatabase()
+    await Product.findByIdAndUpdate(product._id, product)
+    revalidatePath('/admin/products')
+    return {
+      success: true,
+      message: 'Product updated successfully',
+    }
+  } catch (error) {
+    return { success: false, message: formatError(error) }
+  }
+}
 // DELETE
 export async function deleteProduct(id: string) {
   try {
@@ -17,7 +51,12 @@ export async function deleteProduct(id: string) {
     return { success: false, message: formatError(error) }
   }
 }
-
+// GET ONE PRODUCT BY ID
+export async function getProductById(productId: string) {
+  await connectToDatabase()
+  const product = await Product.findById(productId)
+  return JSON.parse(JSON.stringify(product)) as IProduct
+}
 
 
 // GET ALL PRODUCTS FOR ADMIN
@@ -109,6 +148,9 @@ import Product, { IProduct } from '@/lib/db/models/product.model'
 import { PAGE_SIZE } from '../constants'
 import { revalidatePath } from 'next/cache'
 import { formatError } from '../utils'
+import { IProductInput } from '@/types'
+import { ProductInputSchema, ProductUpdateSchema } from '../validator'
+import { z } from 'zod'
 // GET PRODUCTS BY TAG
 export async function getProductsByTag({
   tag,
