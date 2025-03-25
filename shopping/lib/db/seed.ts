@@ -13,25 +13,26 @@ import {
   generateId,
   round2,
 } from '../utils'
-
-import { OrderItem, IOrderInput, ShippingAddress } from '@/types'
-import { AVAILABLE_DELIVERY_DATES } from '../constants'
 import WebPage from './models/web-page.model'
+import Setting from './models/setting.model'
+import { OrderItem, IOrderInput, ShippingAddress } from '@/types'
 
 loadEnvConfig(cwd())
 
 const main = async () => {
   try {
-    const { users, products, reviews,webPages} = data
-    await WebPage.deleteMany()
-    await WebPage.insertMany(webPages)
+    const { users, products, reviews, webPages, settings } = data
     await connectToDatabase(process.env.MONGODB_URI)
 
     await User.deleteMany()
     const createdUser = await User.insertMany(users)
 
-    
-    
+    await Setting.deleteMany()
+    const createdSetting = await Setting.insertMany(settings)
+
+    await WebPage.deleteMany()
+    await WebPage.insertMany(webPages)
+
     await Product.deleteMany()
     const createdProducts = await Product.insertMany(
       products.map((x) => ({ ...x, _id: undefined }))
@@ -77,6 +78,7 @@ const main = async () => {
       createdProducts,
       createdReviews,
       createdOrders,
+      createdSetting,
       message: 'Seeded database successfully',
     })
     process.exit(0)
@@ -177,15 +179,15 @@ export const calcDeliveryDateAndPriceForSeed = ({
   items: OrderItem[]
   shippingAddress?: ShippingAddress
 }) => {
-  
+  const { availableDeliveryDates } = data.settings[0]
   const itemsPrice = round2(
     items.reduce((acc, item) => acc + item.price * item.quantity, 0)
   )
 
   const deliveryDate =
-    AVAILABLE_DELIVERY_DATES[
+    availableDeliveryDates[
       deliveryDateIndex === undefined
-        ? AVAILABLE_DELIVERY_DATES.length - 1
+        ? availableDeliveryDates.length - 1
         : deliveryDateIndex
     ]
 
@@ -198,10 +200,10 @@ export const calcDeliveryDateAndPriceForSeed = ({
       (taxPrice ? round2(taxPrice) : 0)
   )
   return {
-    AVAILABLE_DELIVERY_DATES,
+    availableDeliveryDates,
     deliveryDateIndex:
       deliveryDateIndex === undefined
-        ? AVAILABLE_DELIVERY_DATES.length - 1
+        ? availableDeliveryDates.length - 1
         : deliveryDateIndex,
     itemsPrice,
     shippingPrice,

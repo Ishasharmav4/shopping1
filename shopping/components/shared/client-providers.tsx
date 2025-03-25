@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react'
 import CartSidebar from './cart-sidebar'
 import { ThemeProvider } from './theme-provider'
+import AppInitializer from './app-initializer'
+import { ClientSetting } from '@/types'
 
 
 // Mock implementation of useCartSidebar hook
@@ -32,15 +34,22 @@ const Sonner = () => {
 
 export default function ClientProviders({
   children,
+  setting,
+  
 }: {
   children: React.ReactNode
+  setting:ClientSetting
 }) {
-  const isCartSidebarOpen = useCartSidebar()
-
+  
+  const visible = useCartSidebar()
   return (
-    <>
-    <ThemeProvider attribute='class' defaultTheme='system'>
-      {isCartSidebarOpen ? (
+    
+    <AppInitializer setting={setting}>
+      <ThemeProvider
+        attribute='class'
+        defaultTheme={setting.common.defaultTheme.toLocaleLowerCase()}
+      >
+        {visible ? (
         <div className="flex min-h-screen">
           <div className="flex-1 overflow-hidden">{children}</div>
           <CartSidebar />
@@ -50,6 +59,6 @@ export default function ClientProviders({
       )}
       <Sonner />
       </ThemeProvider>
-    </>
+      </AppInitializer>
   )
 }
