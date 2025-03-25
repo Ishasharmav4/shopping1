@@ -8,7 +8,7 @@ import Order, { IOrder } from '../db/models/order.model'
 import { OrderInputSchema } from '../validator'
 import { AVAILABLE_DELIVERY_DATES, PAGE_SIZE } from '../constants'
 import { paypal } from '../paypal'
-import { sendPurchaseReceipt } from '@/emails'
+import { sendAskReviewOrderItems, sendPurchaseReceipt } from '@/emails'
 import { revalidatePath } from 'next/cache'
 
 
@@ -108,6 +108,7 @@ export async function getOrderSummary(date: DateRange) {
     latestOrders: JSON.parse(JSON.stringify(latestOrders)) as IOrderList[],
   }
 }
+
 
 async function getSalesChartData(date: DateRange) {
   const result = await Order.aggregate([
@@ -393,6 +394,81 @@ export const calcDeliveryDateAndPrice = async ({
     totalPrice,
   }
 }
+
+import mongoose from 'mongoose'
+export async function updateOrderToPaid(orderId: string) {
+  try {
+    await connectToDatabase()
+    const order = await Order.findById(orderId).populate<{
+      user: { email: string; name: string }
+    }>('user', 'name email')
+    if (!order) throw new Error('Order not found')
+    if (order.isPaid) throw new Error('Order is already paid')
+    order.isPaid = true
+    order.paidAt = new Date()
+    await order.save()
+    if (!process.env.MONGODB_URI?.startsWith('mongodb://localhost'))
+      await updateProductStock(order._id)
+    if (order.user.email) await sendPurchaseReceipt({ order })
+    revalidatePath(`/account/orders/${orderId}`)
+    return { success: true, message: 'Order paid successfully' }
+  } catch (err) {
+    return { success: false, message: formatError(err) }
+  }
+}
+const updateProductStock = async (orderId: string) => {
+  const session = await mongoose.connection.startSession()
+
+  try {
+    session.startTransaction()
+    const opts = { session }
+
+    const order = await Order.findOneAndUpdate(
+      { _id: orderId },
+      { isPaid: true, paidAt: new Date() },
+      opts
+    )
+    if (!order) throw new Error('Order not found')
+
+    for (const item of order.items) {
+      const product = await Product.findById(item.product).session(session)
+      if (!product) throw new Error('Product not found')
+
+      product.countInStock -= item.quantity
+      await Product.updateOne(
+        { _id: product._id },
+        { countInStock: product.countInStock },
+        opts
+      )
+    }
+    await session.commitTransaction()
+    session.endSession()
+    return true
+  } catch (error) {
+    await session.abortTransaction()
+    session.endSession()
+    throw error
+  }
+}
+export async function deliverOrder(orderId: string) {
+  try {
+    await connectToDatabase()
+    const order = await Order.findById(orderId).populate<{
+      user: { email: string; name: string }
+    }>('user', 'name email')
+    if (!order) throw new Error('Order not found')
+    if (!order.isPaid) throw new Error('Order is not paid')
+    order.isDelivered = true
+    order.deliveredAt = new Date()
+    await order.save()
+    if (order.user.email) await sendAskReviewOrderItems({ order })
+    revalidatePath(`/account/orders/${orderId}`)
+    return { success: true, message: 'Order delivered successfully' }
+  } catch (err) {
+    return { success: false, message: formatError(err) }
+  }
+}
+
 
 // DELETE
 export async function deleteOrder(id: string) {
